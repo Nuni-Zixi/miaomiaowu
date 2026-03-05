@@ -111,11 +111,11 @@ create_systemd_service() {
         # 交互式环境，可以读取用户输入
         read -p "请输入端口号（默认 8080，直接回车使用默认值）: " PORT_INPUT
         if [ -z "$PORT_INPUT" ]; then
-            PORT_INPUT=8080
+            PORT_INPUT=443
         fi
     else
         # 非交互式环境（如管道），使用默认值
-        PORT_INPUT=${PORT:-8080}
+        PORT_INPUT=${PORT:-443}
         echo_info "使用端口: $PORT_INPUT"
     fi
 
