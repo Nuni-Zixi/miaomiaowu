@@ -70,16 +70,29 @@ install_dependencies() {
     apt-get install -y wget curl systemd >/dev/null 2>&1
 }
 
-# 下载二进制文件
 download_binary() {
     echo_info "下载 $SERVICE_NAME $VERSION..."
+    
+    # 先检查版本是否存在
     DOWNLOAD_URL="https://github.com/${GITHUB_REPO}/releases/download/${VERSION}/${BINARY_NAME}"
-
+    
+    echo_info "检查下载地址: $DOWNLOAD_URL"
+    
+    # 先用curl检查文件是否存在
+    if curl --output /dev/null --silent --head --fail "$DOWNLOAD_URL"; then
+        echo_info "版本 $VERSION 存在，开始下载..."
+    else
+        echo_error "版本 $VERSION 不存在！"
+        echo_error "请访问 https://github.com/${GITHUB_REPO}/releases 查看可用的版本"
+        echo_error "最近发布的版本应该是 v0.5.3，不是 v0.5.4"
+        exit 1
+    fi
+    
     cd /tmp
     if wget -q --show-progress "$DOWNLOAD_URL" -O "$BINARY_NAME"; then
         echo_info "下载完成"
     else
-        echo_error "下载失败，请检查网络连接或版本号"
+        echo_error "下载失败"
         exit 1
     fi
 }
@@ -173,7 +186,7 @@ start_service() {
 show_status() {
     # 从 systemd 服务文件中读取端口号
     CONFIGURED_PORT=$(grep "Environment=\"PORT=" /etc/systemd/system/${SERVICE_NAME}.service | sed 's/.*PORT=\([0-9]*\).*/\1/')
-    CONFIGURED_PORT=${CONFIGURED_PORT:-8080}
+    CONFIGURED_PORT=${CONFIGURED_PORT:-443}
 
     echo ""
     echo "======================================"
@@ -235,7 +248,7 @@ update_service() {
 
     # 询问是否修改端口（支持非交互式环境）
     CURRENT_PORT=$(grep "Environment=\"PORT=" /etc/systemd/system/${SERVICE_NAME}.service 2>/dev/null | sed 's/.*PORT=\([0-9]*\).*/\1/')
-    CURRENT_PORT=${CURRENT_PORT:-8080}
+    CURRENT_PORT=${CURRENT_PORT:-443}
     echo ""
     if [ -t 0 ]; then
         # 交互式环境
