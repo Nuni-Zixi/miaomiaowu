@@ -124,11 +124,11 @@ create_systemd_service() {
         # 交互式环境，可以读取用户输入
         read -p "请输入端口号（默认 8080，直接回车使用默认值）: " PORT_INPUT
         if [ -z "$PORT_INPUT" ]; then
-            PORT_INPUT=2083
+            PORT_INPUT=443
         fi
     else
         # 非交互式环境（如管道），使用默认值
-        PORT_INPUT=${PORT:-2083}
+        PORT_INPUT=${PORT:-443}
         echo_info "使用端口: $PORT_INPUT"
     fi
 
@@ -186,7 +186,7 @@ start_service() {
 show_status() {
     # 从 systemd 服务文件中读取端口号
     CONFIGURED_PORT=$(grep "Environment=\"PORT=" /etc/systemd/system/${SERVICE_NAME}.service | sed 's/.*PORT=\([0-9]*\).*/\1/')
-    CONFIGURED_PORT=${CONFIGURED_PORT:-2083}
+    CONFIGURED_PORT=${CONFIGURED_PORT:-443}
 
     echo ""
     echo "======================================"
@@ -248,7 +248,7 @@ update_service() {
 
     # 询问是否修改端口（支持非交互式环境）
     CURRENT_PORT=$(grep "Environment=\"PORT=" /etc/systemd/system/${SERVICE_NAME}.service 2>/dev/null | sed 's/.*PORT=\([0-9]*\).*/\1/')
-    CURRENT_PORT=${CURRENT_PORT:-2083}
+    CURRENT_PORT=${CURRENT_PORT:-443}
     echo ""
     if [ -t 0 ]; then
         # 交互式环境
